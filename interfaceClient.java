@@ -39,22 +39,7 @@ class TCPClient {
 
           System.out.println("connection established");break;
         }
-/*
-        while(true) {
 
-                  
-             sentence = inFromUser.readLine(); 
-
-             
-
-             outToServer.writeBytes(sentence + '\n'); 
-
-             modifiedSentence = inFromServer.readLine(); 
-
-             System.out.println("FROM SERVER: " + modifiedSentence); 
-
-        }
-        */
     } 
 } 
 
