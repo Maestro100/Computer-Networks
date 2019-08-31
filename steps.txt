@@ -1,0 +1,11 @@
+Input: @[Username][Message]
+File: C: 2 TCP COnnections for Send to Server and for Recv from Server
+FIle: C: Register Username  on both COnnections
+S: Thread : Check If Username Well Formed
+If not-> error to client
+    Output: Incorrect Username, re-enter
+if Well formed-> succ. reg. to client
+    Output: Correct Reg, 
+
+
+
