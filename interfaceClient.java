@@ -19,6 +19,7 @@ class TCPClient {
         while(true) {
 
              sentence = inFromUser.readLine(); 
+             
 
              outToServer.writeBytes(sentence + '\n'); 
 
@@ -27,18 +28,6 @@ class TCPClient {
              System.out.println("FROM SERVER: " + modifiedSentence); 
 
         }
-
-//        clientSocket.close(); 
-//hsnd aj dmnasbdhas dnasbldna sdj asld asd
-
-
-//git status
-//git pull
-//git add .
-//git commit -m "messagefsjdbf"
-//git push
-//dhasjbdmn asdvasjdbsavid
-                   
     } 
 } 
 
