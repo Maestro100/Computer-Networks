@@ -1,45 +1,44 @@
-import java.io.*; 
-import java.net.*; 
-class TCPClient { 
+import java.io.*;
+import java.net.*;
 
-    public static void main(String argv[]) throws Exception 
-    { 
-        String sentence; 
-        String modifiedSentence; 
+class TCPClient {
 
-        BufferedReader inFromUser = new BufferedReader(new InputStreamReader(System.in)); 
+  public static void main(String argv[]) throws Exception {
+    String sentence;
+    String modifiedSentence;
 
-        Socket receiverSocket = new Socket("localhost", 6789);
-        Socket senderSocket = new Socket("localhost", 6788);
+    BufferedReader inFromUser = new BufferedReader(new InputStreamReader(System.in));
 
-        DataOutputStream outSender = new DataOutputStream(senderSocket.getOutputStream());
-        DataOutputStream outReceiver = new DataOutputStream(receiverSocket.getOutputStream());
- 
-        BufferedReader inSender = new BufferedReader(new InputStreamReader(senderSocket.getInputStream())); 
-        BufferedReader inReceiver = new BufferedReader(new InputStreamReader(receiverSocket.getInputStream())); 
+    Socket receiverSocket = new Socket("localhost", 6789);
+    Socket senderSocket = new Socket("localhost", 6788);
 
+    DataOutputStream outSender = new DataOutputStream(senderSocket.getOutputStream());
+    DataOutputStream outReceiver = new DataOutputStream(receiverSocket.getOutputStream());
 
-        while(true){
-          System.out.print("Write your username: ");
-          sentence  = inFromUser.readLine();
+    BufferedReader inSender = new BufferedReader(new InputStreamReader(senderSocket.getInputStream()));
+    BufferedReader inReceiver = new BufferedReader(new InputStreamReader(receiverSocket.getInputStream()));
 
-          outSender.writeBytes("REGISTER TOSEND "+sentence+"\n\n");
-          modifiedSentence = inSender.readLine();
-          if(!modifiedSentence.substring(0,3).equals("REG")){
-            System.out.println("Bad Username");
-            continue;
-          }
+    while (true) {
+      System.out.print("Write your username: ");
+      sentence = inFromUser.readLine();
 
-          outReceiver.writeBytes("REGISTER TORECV "+sentence+"\n\n");
-          modifiedSentence = inReceiver.readLine();
-          if(!modifiedSentence.substring(0,3).equals("REG")){
-            System.out.println("Bad Username");
-            continue;
-          }
+      outSender.writeBytes("REGISTER TOSEND " + sentence + "\n\n");
+      modifiedSentence = inSender.readLine();
+      if (!modifiedSentence.substring(0, 3).equals("REG")) {
+        System.out.println("Bad Username");
+        continue;
+      }
 
-          System.out.println("connection established");break;
-        }
+      outReceiver.writeBytes("REGISTER TORECV " + sentence + "\n\n");
+      modifiedSentence = inReceiver.readLine();
+      if (!modifiedSentence.substring(0, 3).equals("REG")) {
+        System.out.println("Bad Username");
+        continue;
+      }
 
-    } 
-} 
+      System.out.println("connection established");
+      break;
+    }
 
+  }
+}
