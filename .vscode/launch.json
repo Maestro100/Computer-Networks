@@ -2,6 +2,13 @@
     "configurations": [
         {
             "type": "java",
+            "name": "CodeLens (Launch) - TCPServerThread",
+            "request": "launch",
+            "mainClass": "TCPServerThread",
+            "projectName": "Computer-Networks-Ass2_e57d279d"
+        },
+        {
+            "type": "java",
             "name": "CodeLens (Launch) - TCPClient",
             "request": "launch",
             "mainClass": "TCPClient"
