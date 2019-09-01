@@ -21,9 +21,12 @@ class TCPClient {
     while (true) {
       System.out.print("Write your username: ");
       sentence = inFromUser.readLine();
+      // inFromUser.readLine();
 
       outSender.writeBytes("REGISTER TOSEND " + sentence + "\n\n");
       modifiedSentence = inSender.readLine();
+      inSender.readLine();
+      // System.out.println("\n"+modifiedSentence);
       if (!modifiedSentence.substring(0, 3).equals("REG")) {
         System.out.println("Bad Username");
         continue;
@@ -31,6 +34,7 @@ class TCPClient {
 
       outReceiver.writeBytes("REGISTER TORECV " + sentence + "\n\n");
       modifiedSentence = inReceiver.readLine();
+      inReceiver.readLine();
       if (!modifiedSentence.substring(0, 3).equals("REG")) {
         System.out.println("Bad Username");
         continue;

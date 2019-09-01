@@ -7,46 +7,31 @@ class TCPServerThread {
 
         System.out.println("\n");
 
-        System.out.println("ser start");
+        //System.out.println("ser start");
 
         ServerSocket receiverSocket = new ServerSocket(6789);
         ServerSocket senderSocket = new ServerSocket(6788);
 
-        System.out.println("con estab");
+        //System.out.println("con estab");
 
-        //while (true) {
+        Socket receiverConnectionSocket = receiverSocket.accept();
+        Socket senderConnectionSocket = senderSocket.accept();
 
-            Socket receiverConnectionSocket = receiverSocket.accept();
-            Socket senderConnectionSocket = senderSocket.accept();
+        BufferedReader inReceiver = new BufferedReader(
+                new InputStreamReader(receiverConnectionSocket.getInputStream()));
+        BufferedReader inSender = new BufferedReader(new InputStreamReader(senderConnectionSocket.getInputStream()));
 
-            BufferedReader inReceiver = new BufferedReader(
-                    new InputStreamReader(receiverConnectionSocket.getInputStream()));
-            BufferedReader inSender = new BufferedReader(
-                    new InputStreamReader(senderConnectionSocket.getInputStream()));
+        DataOutputStream outReceiver = new DataOutputStream(receiverConnectionSocket.getOutputStream());
+        DataOutputStream outSender = new DataOutputStream(senderConnectionSocket.getOutputStream());
 
-            DataOutputStream outReceiver = new DataOutputStream(receiverConnectionSocket.getOutputStream());
-            DataOutputStream outSender = new DataOutputStream(senderConnectionSocket.getOutputStream());
+        Thread threadReceiver = new Thread(new threadReceiverClass(receiverConnectionSocket, inReceiver, outReceiver));
+        Thread threadSender = new Thread(new threadSenderClass(senderConnectionSocket, inSender, outSender));
 
-            // SocketThread socketThread = new SocketThread(connectionSocket, inFromClient,
-            // outToClient);
-            Thread threadReceiver = new Thread(
-                    new threadReceiverClass(receiverConnectionSocket, inReceiver, outReceiver));
-            Thread threadSender = new Thread(new threadSenderClass(senderConnectionSocket, inSender, outSender));
+        threadReceiver.start();
+        threadSender.start();
 
-            threadReceiver.start();
-            threadSender.start();
-
-            
-
-        //}
-
-        //receiverSocket.close();
-        //senderSocket.close();
     }
 }
-
-// REGISTERED TORECV [username]\n \n
-// ERROR 100 Malformed username\n \n
 
 class threadReceiverClass implements Runnable {
     String clientSentence;
@@ -65,7 +50,8 @@ class threadReceiverClass implements Runnable {
         for (int i = 0; i < usr.length(); i++) {
             Character c = usr.charAt(i);
             int v = c;
-            if (!((v >= 65 && v <= 90) || (v >= 65 && v <= 90) || (v >= 48 && v <= 57)))
+
+            if (!((v >= 65 && v <= 90) || (v >= 97 && v <= 122) || (v >= 48 && v <= 57)))
                 return false;
         }
         return true;
@@ -76,22 +62,20 @@ class threadReceiverClass implements Runnable {
             try {
 
                 clientSentence = inFromClient.readLine();
+                inFromClient.readLine();
 
                 System.out.println("client sentence on rec to sev: " + clientSentence);
 
-                modifiedSentence = clientSentence.substring(16, modifiedSentence.length() - 2);
-                // REGISTERED TORECV [username]\n \n
+                modifiedSentence = clientSentence.substring(16);
 
-                if (usernameChecker(modifiedSentence))
+                if (usernameChecker(modifiedSentence)) {
                     outToClient.writeBytes("REGISTERED TORECV " + modifiedSentence + "\n\n");
-                else
-                    outToClient.writeBytes("ERROR 100 Malformed username\n\n");
-            } catch (Exception e) {
-                try {
                     connectionSocket.close();
-                } catch (Exception ee) {
+                } else {
+                    outToClient.writeBytes("ERROR 100 Malformed username\n\n");
                 }
-                break;
+            } catch (Exception e) {
+
             }
         }
     }
@@ -114,7 +98,8 @@ class threadSenderClass implements Runnable {
         for (int i = 0; i < usr.length(); i++) {
             Character c = usr.charAt(i);
             int v = c;
-            if (!((v >= 65 && v <= 90) || (v >= 65 && v <= 90) || (v >= 48 && v <= 57)))
+
+            if (!((v >= 65 && v <= 90) || (v >= 97 && v <= 122) || (v >= 48 && v <= 57)))
                 return false;
         }
         return true;
@@ -125,57 +110,22 @@ class threadSenderClass implements Runnable {
             try {
 
                 clientSentence = inFromClient.readLine();
+                inFromClient.readLine();
 
-                System.out.println("client sentence on rec to sev: " + clientSentence);
+                modifiedSentence = clientSentence.substring(16);
 
-                modifiedSentence = clientSentence.substring(16, modifiedSentence.length() - 2);
-                // REGISTERED TORECV [username]\n \n
-
-                if (usernameChecker(modifiedSentence))
-                    outToClient.writeBytes("REGISTERED TOSEND " + modifiedSentence + "\n\n");
-                else
-                    outToClient.writeBytes("ERROR 100 Malformed username\n\n");
-            } catch (Exception e) {
-                try {
+                //System.out.println("\n" + modifiedSentence);
+                if (usernameChecker(modifiedSentence)) {
+                    modifiedSentence = "REGISTERED TOSEND " + modifiedSentence + "\n\n";
+                    //System.out.println("swe:"+modifiedSentence);
+                    outToClient.writeBytes(modifiedSentence);
                     connectionSocket.close();
-                } catch (Exception ee) {
+                } else {
+                    //System.out.println("swe:err");
+                    outToClient.writeBytes("ERROR 100 Malformed username\n\n");//\n
                 }
-                break;
-            }
-        }
-    }
-}
-
-class SocketThread implements Runnable {
-    String clientSentence;
-    String capitalizedSentence;
-    Socket connectionSocket;
-    BufferedReader inFromClient;
-    DataOutputStream outToClient;
-
-    SocketThread(Socket connectionSocket, BufferedReader inFromClient, DataOutputStream outToClient) {
-        this.connectionSocket = connectionSocket;
-        this.inFromClient = inFromClient;
-        this.outToClient = outToClient;
-    }
-
-    public void run() {
-        while (true) {
-            try {
-
-                clientSentence = inFromClient.readLine();
-
-                System.out.println(clientSentence);
-
-                capitalizedSentence = clientSentence.toUpperCase() + '\n';
-
-                outToClient.writeBytes(capitalizedSentence);
             } catch (Exception e) {
-                try {
-                    connectionSocket.close();
-                } catch (Exception ee) {
-                }
-                break;
+
             }
         }
     }
