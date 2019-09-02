@@ -12,14 +12,12 @@ class TCPServerThread {
         System.out.println("\n");
         ServerSocket[] receiverSocket=new ServerSocket[nUsers];
         ServerSocket[] senderSocket=new ServerSocket[nUsers];
-        int[] rPorts=new int[nUsers];
-        rPorts={6001,6002,6003,6004,6005};
-        sPorts={7001,7002,7003,7004,7005};
-        int[] sPorts=new int[nUsers];
+        int[] rPorts={6001,6002,6003,6004,6005};
+        int[] sPorts={7001,7002,7003,7004,7005};
 
         //System.out.println("ser start");
-        int i;
-        for(i=0; i< nUsers; i++)
+        // int i;
+        for(int i=0; i< nUsers; i++)
         {
         receiverSocket[i] = new ServerSocket( rPorts[i]);
         senderSocket[i] = new ServerSocket( sPorts[i]);
@@ -51,11 +49,15 @@ class threadReceiverClass implements Runnable {
     Socket connectionSocket;
     BufferedReader inFromClient;
     DataOutputStream outToClient;
+    HashMap<String,Integer> mapR;
+    int rPort;
 
-    threadReceiverClass(Socket connectionSocket, BufferedReader inFromClient, DataOutputStream outToClient, int rPort, Map<String,Integer> mapR) {
+    threadReceiverClass(Socket connectionSocket, BufferedReader inFromClient, DataOutputStream outToClient, int rPort, HashMap<String,Integer> mapR) {
         this.connectionSocket = connectionSocket;
         this.inFromClient = inFromClient;
         this.outToClient = outToClient;
+        this.mapR = mapR;
+        this.rPort=rPort;
     }
 
     public boolean usernameChecker(String usr) {
@@ -82,7 +84,7 @@ class threadReceiverClass implements Runnable {
 
                 if (usernameChecker(modifiedSentence)) {
                     outToClient.writeBytes("REGISTERED TORECV " + modifiedSentence + "\n\n");
-                    map.put(modifiedSentence, rPort);
+                    mapR.put(modifiedSentence, rPort);
                     //connectionSocket.close();
                     return;
                 } else {

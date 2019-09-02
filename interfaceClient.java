@@ -43,8 +43,8 @@ class TCPClient {
       System.out.println("connection established");
       break;
     }
-    Thread threadReceiver = new Thread(new threadReceiverClass(receiverSocket,inReceiver, outReceiver);
-    Thread threadSender = new Thread(new threadSenderClass(senderSocket,inFromUser, inSender, outSender);
+    Thread threadReceiver = new Thread(new threadReceiverClass(receiverSocket,inReceiver, outReceiver));
+    Thread threadSender = new Thread(new threadSenderClass(senderSocket,inFromUser, inSender, outSender));
 
     threadReceiver.start();
     threadSender.start();
@@ -120,15 +120,15 @@ class threadSenderClass implements Runnable {
               outToServer.writeBytes("SEND " + recUsername+"\n"+"Content-Length: "+contLen+"\n"+desiredMessage+"\n");
               serverSentence = inFromServer.readLine();
               inFromServer.readLine(); 
-              if(serverSentance.substring(0,4).equals("SENT")
+              if(serverSentance.substring(0,4).equals("SENT"))
                 {
                   System.out.println("Message Delivered to " + serverSentance.substring(5));
                 }
-              else if(serverSentance.substring(6,9).equals("102")
+              else if(serverSentance.substring(0,9).equals("ERROR 102"))
                 {
                   System.out.println("Unable to Send Message");
                 }
-              else if(serverSentance.substring(6,9).equals("103")
+              else if(serverSentance.substring(0,9).equals("ERROR 103"))
                 {
                   //IDK what to do when header is wrong
                 }
