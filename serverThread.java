@@ -1,21 +1,33 @@
 import java.io.*;
 import java.net.*;
-
+import java.util.*; 
 class TCPServerThread {
-
+        
+    
+    static int nUsers;
+    static HashMap<String, Integer> mapReceiverPorts = new HashMap<>(); 
     public static void main(String argv[]) throws Exception {
-
+        nUsers=5;
+        
         System.out.println("\n");
+        ServerSocket[] receiverSocket=new ServerSocket[nUsers];
+        ServerSocket[] senderSocket=new ServerSocket[nUsers];
+        int[] rPorts=new int[nUsers];
+        rPorts={6001,6002,6003,6004,6005};
+        sPorts={7001,7002,7003,7004,7005};
+        int[] sPorts=new int[nUsers];
 
         //System.out.println("ser start");
-
-        ServerSocket receiverSocket = new ServerSocket(6789);
-        ServerSocket senderSocket = new ServerSocket(6788);
-
+        int i;
+        for(i=0; i< nUsers; i++)
+        {
+        receiverSocket[i] = new ServerSocket( rPorts[i]);
+        senderSocket[i] = new ServerSocket( sPorts[i]);
+        
         //System.out.println("con estab");
 
-        Socket receiverConnectionSocket = receiverSocket.accept();
-        Socket senderConnectionSocket = senderSocket.accept();
+        Socket receiverConnectionSocket =  receiverSocket[i].accept();
+        Socket senderConnectionSocket =  senderSocket[i].accept();
 
         BufferedReader inReceiver = new BufferedReader(
                 new InputStreamReader(receiverConnectionSocket.getInputStream()));
@@ -24,12 +36,12 @@ class TCPServerThread {
         DataOutputStream outReceiver = new DataOutputStream(receiverConnectionSocket.getOutputStream());
         DataOutputStream outSender = new DataOutputStream(senderConnectionSocket.getOutputStream());
 
-        Thread threadReceiver = new Thread(new threadReceiverClass(receiverConnectionSocket, inReceiver, outReceiver));
-        Thread threadSender = new Thread(new threadSenderClass(senderConnectionSocket, inSender, outSender));
+        Thread threadReceiver = new Thread(new threadReceiverClass(receiverConnectionSocket, inReceiver, outReceiver,  rPorts[i], mapReceiverPorts));
+        Thread threadSender = new Thread(new threadSenderClass(senderConnectionSocket, inSender, outSender,  sPorts[i], mapReceiverPorts));
 
         threadReceiver.start();
         threadSender.start();
-
+        }
     }
 }
 
@@ -40,7 +52,7 @@ class threadReceiverClass implements Runnable {
     BufferedReader inFromClient;
     DataOutputStream outToClient;
 
-    threadReceiverClass(Socket connectionSocket, BufferedReader inFromClient, DataOutputStream outToClient) {
+    threadReceiverClass(Socket connectionSocket, BufferedReader inFromClient, DataOutputStream outToClient, int rPort, Map<String,Integer> mapR) {
         this.connectionSocket = connectionSocket;
         this.inFromClient = inFromClient;
         this.outToClient = outToClient;
@@ -70,7 +82,9 @@ class threadReceiverClass implements Runnable {
 
                 if (usernameChecker(modifiedSentence)) {
                     outToClient.writeBytes("REGISTERED TORECV " + modifiedSentence + "\n\n");
-                    connectionSocket.close();
+                    map.put(modifiedSentence, rPort);
+                    //connectionSocket.close();
+                    return;
                 } else {
                     outToClient.writeBytes("ERROR 100 Malformed username\n\n");
                 }
@@ -88,7 +102,7 @@ class threadSenderClass implements Runnable {
     BufferedReader inFromClient;
     DataOutputStream outToClient;
 
-    threadSenderClass(Socket connectionSocket, BufferedReader inFromClient, DataOutputStream outToClient) {
+    threadSenderClass(Socket connectionSocket, BufferedReader inFromClient, DataOutputStream outToClient, int sPort, Map<String,Integer> mapR) {
         this.connectionSocket = connectionSocket;
         this.inFromClient = inFromClient;
         this.outToClient = outToClient;
@@ -119,7 +133,8 @@ class threadSenderClass implements Runnable {
                     modifiedSentence = "REGISTERED TOSEND " + modifiedSentence + "\n\n";
                     //System.out.println("swe:"+modifiedSentence);
                     outToClient.writeBytes(modifiedSentence);
-                    connectionSocket.close();
+                    //connectionSocket.close();
+                    break;
                 } else {
                     //System.out.println("swe:err");
                     outToClient.writeBytes("ERROR 100 Malformed username\n\n");//\n
@@ -127,6 +142,13 @@ class threadSenderClass implements Runnable {
             } catch (Exception e) {
 
             }
+        }
+        /*
+        Get the Send Message, parse it if its headers are correct then Forward Messages to receiver by 
+        looking up the hash table for connection and send the ack(when received from rec) to sender 
+        */
+        while (true){
+            
         }
     }
 }

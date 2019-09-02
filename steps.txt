@@ -7,5 +7,5 @@ If not-> error to client
 if Well formed-> succ. reg. to client
     Output: Correct Reg, 
 
-
+        
 
