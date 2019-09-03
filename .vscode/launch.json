@@ -2,6 +2,13 @@
     "configurations": [
         {
             "type": "java",
+            "name": "CodeLens (Launch) - CryptographyExample",
+            "request": "launch",
+            "mainClass": "CryptographyExample",
+            "projectName": "Computer-Networks-Ass2_e57d279d"
+        },
+        {
+            "type": "java",
             "name": "CodeLens (Launch) - Test",
             "request": "launch",
             "mainClass": "Test",
