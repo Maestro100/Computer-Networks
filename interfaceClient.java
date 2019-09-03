@@ -64,25 +64,26 @@ class TCPClient {
       this.inFromServer = inFromServer;
       this.outToServer = outToServer;
     }
+
     public void run() {
       while (true) {
         try {
-          int flag=1;
+          int flag = 1;
           serverSentence = inFromServer.readLine();
           contSentence = inFromServer.readLine();
-          content= inFromServer.readLine();
+          content = inFromServer.readLine();
           inFromServer.readLine();
-          //System.out.println("Fowarded Msg Rec From Server: " + serverSentence + "\n"+contSentence+"\n"+content+"\n");
-          if(!serverSentence.substring(0, 8).equals("FORWARD ")||serverSentence.charAt(8)==' '
-          ||!contSentence.substring(0, 16).equals("Content-length: ")||contSentence.charAt(16)==' ')
-            flag=0;
-          else
-            {
-              modifiedSentence=serverSentence.substring(8);
-              contSentence=contSentence.substring(16);
-              content= content.substring(0,Integer.parseInt(contSentence));
-            }
-          if (flag!=0) {
+          // System.out.println("Fowarded Msg Rec From Server: " + serverSentence +
+          // "\n"+contSentence+"\n"+content+"\n");
+          if (!serverSentence.substring(0, 8).equals("FORWARD ") || serverSentence.charAt(8) == ' '
+              || !contSentence.substring(0, 16).equals("Content-length: ") || contSentence.charAt(16) == ' ')
+            flag = 0;
+          else {
+            modifiedSentence = serverSentence.substring(8);
+            contSentence = contSentence.substring(16);
+            content = content.substring(0, Integer.parseInt(contSentence));
+          }
+          if (flag != 0) {
             System.out.println("Message Received From " + modifiedSentence + " : " + content);
             outToServer.writeBytes("RECEIVED " + modifiedSentence + "\n\n");
           } else {
@@ -116,19 +117,18 @@ class TCPClient {
 
     public int messageChecker(String usr) {
       // Make a function to check the user's Message.
-      if(usr.charAt(0)!='@')
+      if (usr.charAt(0) != '@')
         return 0;
-      int f=0,ret =0;
+      int f = 0, ret = 0;
       for (int i = 0; i < usr.length(); i++) {
         Character c = usr.charAt(i);
-        if (c==' '&&f==0)
-        {    
+        if (c == ' ' && f == 0) {
           f++;
-          ret=i;
+          ret = i;
         }
 
-    }
-    return ret;
+      }
+      return ret;
     }
 
     public void run() {
@@ -137,12 +137,12 @@ class TCPClient {
           System.out.println("Enter @[Username] [Message] ");
           userMessage = inFromUser.readLine();
           int sub = messageChecker(userMessage);
-          if (sub!=0) {
-            recUsername=userMessage.substring(1, sub);
-            desiredMessage=userMessage.substring(sub+1);
-            contLen=userMessage.length()-sub-1;
-            outToServer
-                .writeBytes("SEND " + recUsername + "\n" + "Content-length: " + contLen + "\n" + desiredMessage +"\n\n" );
+          if (sub != 0) {
+            recUsername = userMessage.substring(1, sub);
+            desiredMessage = userMessage.substring(sub + 1);
+            contLen = userMessage.length() - sub - 1;
+            outToServer.writeBytes(
+                "SEND " + recUsername + "\n" + "Content-length: " + contLen + "\n" + desiredMessage + "\n\n");
             serverSentance = inFromServer.readLine();
             inFromServer.readLine();
             if (serverSentance.substring(0, 4).equals("SENT")) {
@@ -150,7 +150,8 @@ class TCPClient {
             } else if (serverSentance.substring(0, 9).equals("ERROR 102")) {
               System.out.println("Unable to Send Message");
             } else if (serverSentance.substring(0, 9).equals("ERROR 103")) {
-              //This means that you are writing wrong headers, or the server's header parser is wrong.
+              // This means that you are writing wrong headers, or the server's header parser
+              // is wrong.
               System.out.println("Wrong Headers");
             } else {
               System.out.println("Unknown Response From Server :" + serverSentance);
