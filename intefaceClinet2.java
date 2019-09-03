@@ -1,7 +1,7 @@
 import java.io.*;
 import java.net.*;
 
-class TCPClient {
+class TCPClient2 {
 
   public static void main(String argv[]) throws Exception {
     String sentence;
@@ -9,8 +9,8 @@ class TCPClient {
 
     BufferedReader inFromUser = new BufferedReader(new InputStreamReader(System.in));
 
-    Socket receiverSocket = new Socket("localhost", 6001);
-    Socket senderSocket = new Socket("localhost", 7001);
+    Socket receiverSocket = new Socket("localhost", 6002);
+    Socket senderSocket = new Socket("localhost", 7002);
 
     DataOutputStream outSender = new DataOutputStream(senderSocket.getOutputStream());
     DataOutputStream outReceiver = new DataOutputStream(receiverSocket.getOutputStream());
@@ -136,7 +136,7 @@ class TCPClient {
         try {
           System.out.println("Enter @[Username] [Message] ");
           userMessage = inFromUser.readLine();
-          int sub = messageChecker(userMessage);
+          int sub= messageChecker(userMessage);
           if (sub!=0) {
             recUsername=userMessage.substring(1, sub);
             desiredMessage=userMessage.substring(sub+1);

@@ -5,17 +5,29 @@ import java.util.*;
 class TCPServerThread {
 
     static int nUsers;
-    static HashMap<String, Integer> mapReceiverPorts = new HashMap<>();
-
+    static HashMap<String, Integer> mapReceiverPorts;
+    static int[] rPorts= { 6001, 6002, 6003, 6004, 6005 };
+    static int[] sPorts= { 7001, 7002, 7003, 7004, 7005 };
+    static ServerSocket[] receiverSocket;
+    static ServerSocket[] senderSocket;
+    static Socket[] receiverConnectionSocket;
+    static Socket[] senderConnectionSocket;
+    static BufferedReader[] inReceiver;
+    static BufferedReader[] inSender;
+    static DataOutputStream[] outReceiver;
+    static DataOutputStream[] outSender;
     public static void main(String argv[]) throws Exception {
-        nUsers = 1;
-
-        System.out.println(nUsers + ":\n");
-        ServerSocket[] receiverSocket = new ServerSocket[nUsers];
-        ServerSocket[] senderSocket = new ServerSocket[nUsers];
-        int[] rPorts = { 6001, 6002, 6003, 6004, 6005 };
-        int[] sPorts = { 7001, 7002, 7003, 7004, 7005 };
-
+        nUsers = 2;
+        mapReceiverPorts = new HashMap<>();
+        System.out.println(nUsers + " Users\n");
+        receiverSocket = new ServerSocket[nUsers];
+        senderSocket = new ServerSocket[nUsers];
+        receiverConnectionSocket= new Socket[nUsers];
+        senderConnectionSocket= new Socket[nUsers];
+        inReceiver= new BufferedReader[nUsers];
+        inSender= new BufferedReader[nUsers];
+        outReceiver= new DataOutputStream[nUsers];
+        outSender= new DataOutputStream[nUsers];
         // System.out.println("ser start");
         // int i;
         for (int i = 0; i < nUsers; i++) {
@@ -24,16 +36,14 @@ class TCPServerThread {
 
             // System.out.println("con estab");
 
-            Socket receiverConnectionSocket = receiverSocket[i].accept();
-            Socket senderConnectionSocket = senderSocket[i].accept();
+            receiverConnectionSocket[i] = receiverSocket[i].accept();
+            senderConnectionSocket[i] = senderSocket[i].accept();
 
-            BufferedReader inReceiver = new BufferedReader(
-                    new InputStreamReader(receiverConnectionSocket.getInputStream()));
-            BufferedReader inSender = new BufferedReader(
-                    new InputStreamReader(senderConnectionSocket.getInputStream()));
+            inReceiver[i] = new BufferedReader(new InputStreamReader(receiverConnectionSocket[i].getInputStream()));
+            inSender[i] = new BufferedReader(new InputStreamReader(senderConnectionSocket[i].getInputStream()));
 
-            DataOutputStream outReceiver = new DataOutputStream(receiverConnectionSocket.getOutputStream());
-            DataOutputStream outSender = new DataOutputStream(senderConnectionSocket.getOutputStream());
+            outReceiver[i] = new DataOutputStream(receiverConnectionSocket[i].getOutputStream());
+            outSender[i] = new DataOutputStream(senderConnectionSocket[i].getOutputStream());
 
             // threadReceiverClass socketThreadReceiverClass = new
             // threadReceiverClass(receiverConnectionSocket, inReceiver, outReceiver,
@@ -41,10 +51,10 @@ class TCPServerThread {
             // threadSenderClass socketThreadSenderClass = new
             // threadSenderClass(senderConnectionSocket, inSender, outSender, sPorts[i],
             // mapReceiverPorts);
-            Thread threadReceiver = new Thread(new threadReceiverClass(receiverConnectionSocket, inReceiver,
-                    outReceiver, rPorts[i], mapReceiverPorts));
+            Thread threadReceiver = new Thread(new threadReceiverClass(receiverConnectionSocket[i], inReceiver[i],
+                    outReceiver[i],i));
             Thread threadSender = new Thread(
-                    new threadSenderClass(senderConnectionSocket, inSender, outSender, sPorts[i], mapReceiverPorts));
+                    new threadSenderClass(senderConnectionSocket[i], inSender[i], outSender[i],i));
 
             threadReceiver.start();
             threadSender.start();
@@ -57,16 +67,13 @@ class TCPServerThread {
         Socket connectionSocket;
         BufferedReader inFromClient;
         DataOutputStream outToClient;
-        HashMap<String, Integer> mapR;
-        int rPort;
+        int index;
 
-        threadReceiverClass(Socket connectionSocket, BufferedReader inFromClient, DataOutputStream outToClient,
-                int rPort, HashMap<String, Integer> mapR) {
+        threadReceiverClass(Socket connectionSocket, BufferedReader inFromClient, DataOutputStream outToClient, int index) {
             this.connectionSocket = connectionSocket;
             this.inFromClient = inFromClient;
             this.outToClient = outToClient;
-            this.mapR = mapR;
-            this.rPort = rPort;
+            this.index = index;
         }
 
         public boolean usernameChecker(String usr) {
@@ -93,7 +100,7 @@ class TCPServerThread {
 
                     if (usernameChecker(modifiedSentence)) {
                         outToClient.writeBytes("REGISTERED TORECV " + modifiedSentence + "\n\n");
-                        mapR.put(modifiedSentence, rPort);
+                        mapReceiverPorts.put(modifiedSentence, rPorts[index]);
                         // connectionSocket.close();
                         return;
                     } else {
@@ -110,18 +117,16 @@ class TCPServerThread {
         String clientSentence;
         String modifiedSentence;
         Socket connectionSocket;
+        String senderUsername;
         BufferedReader inFromClient;
         DataOutputStream outToClient;
-        HashMap<String, Integer> mapR;
-        int sPort;
-
-        threadSenderClass(Socket connectionSocket, BufferedReader inFromClient, DataOutputStream outToClient, int sPort,
-                HashMap<String, Integer> mapR) {
+        int index;
+        int contLen;
+        threadSenderClass(Socket connectionSocket, BufferedReader inFromClient, DataOutputStream outToClient, int index) {
             this.connectionSocket = connectionSocket;
             this.inFromClient = inFromClient;
             this.outToClient = outToClient;
-            this.mapR = mapR;
-            this.sPort = sPort;
+            this.index = index;
         }
 
         public boolean usernameChecker(String usr) {
@@ -146,6 +151,7 @@ class TCPServerThread {
 
                     // System.out.println("\n" + modifiedSentence);
                     if (usernameChecker(modifiedSentence)) {
+                        senderUsername = modifiedSentence;
                         modifiedSentence = "REGISTERED TOSEND " + modifiedSentence + "\n\n";
                         // System.out.println("swe:"+modifiedSentence);
                         outToClient.writeBytes(modifiedSentence);
@@ -165,7 +171,61 @@ class TCPServerThread {
              * ack(when received from rec) to sender
              */
             while (true) {
-
+                try {
+                    System.out.println("Forwarder Thread @ Server");
+                clientSentence = inFromClient.readLine();
+               // System.out.println("l1:"+clientSentence);
+                String contSentence = inFromClient.readLine();
+               // System.out.println("l2:"+contSentence);
+                String content = inFromClient.readLine();
+              //  System.out.println("l4:"+content);
+                inFromClient.readLine();
+               // System.out.println("Msg Rec From Client: " + clientSentence + "\n"+contSentence+"\n"+content+"\n\n");
+                int flag=1;
+          if(!clientSentence.substring(0, 4).equals("SEND")||clientSentence.charAt(5)==' '
+          ||!contSentence.substring(0, 16).equals("Content-length: ")||contSentence.charAt(16)==' ')
+            {
+                flag=0;
+            }
+          else
+            {
+              
+              modifiedSentence=clientSentence.substring(5);
+              contSentence=contSentence.substring(16);
+              contLen=Integer.parseInt(contSentence);
+              content= content.substring(0,contLen);
+            }
+          if (flag!=0) {
+              int rPort=0;
+            //  System.out.println("T1");
+            if(mapReceiverPorts.containsKey(modifiedSentence))
+            {    
+             //   System.out.println("T2");
+                rPort=mapReceiverPorts.get(modifiedSentence);
+                BufferedReader inRecipent =inReceiver[rPort-6001];
+                DataOutputStream outRecipent = outReceiver[rPort-6001];
+                outRecipent.writeBytes("FORWARD " + senderUsername + "\n" + "Content-length: " + contLen + "\n"+ content+"\n\n" );
+                clientSentence = inRecipent.readLine();
+                if(!clientSentence.substring(0,9).equals("RECEIVED "))
+                   { 
+                       System.out.println("Msg Rec From Client: " + clientSentence);
+                    outToClient.writeBytes("ERROR 102 Unable to send\n\n");
+                    }
+                else
+                    {
+                        outToClient.writeBytes("SENT "+modifiedSentence+"\n\n"); 
+                    }
+            }
+            else
+            {
+                outToClient.writeBytes("ERROR 102 Unable to send\n\n");
+            }
+              } else {
+            outToClient.writeBytes("ERROR 103 Header Incomplete\n\n");
+          }
+                } catch (Exception e) {
+                    
+                }
             }
         }
     }
