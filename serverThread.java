@@ -7,9 +7,9 @@ class TCPServerThread {
     static int nUsers;
     static HashMap<String, Integer> mapReceiverPorts = new HashMap<>(); 
     public static void main(String argv[]) throws Exception {
-        nUsers=5;
+        nUsers=1;
         
-        System.out.println("\n");
+        System.out.println(nUsers+":\n");
         ServerSocket[] receiverSocket=new ServerSocket[nUsers];
         ServerSocket[] senderSocket=new ServerSocket[nUsers];
         int[] rPorts={6001,6002,6003,6004,6005};
@@ -103,11 +103,15 @@ class threadSenderClass implements Runnable {
     Socket connectionSocket;
     BufferedReader inFromClient;
     DataOutputStream outToClient;
+    HashMap<String,Integer> mapR;
+    int sPort;
 
-    threadSenderClass(Socket connectionSocket, BufferedReader inFromClient, DataOutputStream outToClient, int sPort, Map<String,Integer> mapR) {
+    threadSenderClass(Socket connectionSocket, BufferedReader inFromClient, DataOutputStream outToClient, int sPort, HashMap<String,Integer> mapR) {
         this.connectionSocket = connectionSocket;
         this.inFromClient = inFromClient;
         this.outToClient = outToClient;
+        this.mapR = mapR;
+        this.sPort=sPort;
     }
 
     public boolean usernameChecker(String usr) {

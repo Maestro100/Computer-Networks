@@ -9,8 +9,8 @@ class TCPClient {
 
     BufferedReader inFromUser = new BufferedReader(new InputStreamReader(System.in));
 
-    Socket receiverSocket = new Socket("localhost", 6789);
-    Socket senderSocket = new Socket("localhost", 6788);
+    Socket receiverSocket = new Socket("localhost", 6001);
+    Socket senderSocket = new Socket("localhost", 7001);
 
     DataOutputStream outSender = new DataOutputStream(senderSocket.getOutputStream());
     DataOutputStream outReceiver = new DataOutputStream(receiverSocket.getOutputStream());
@@ -96,6 +96,7 @@ class threadSenderClass implements Runnable {
   String serverSentance;
   int contLen;
   Socket connectionSocket;
+  BufferedReader inFromUser;
   BufferedReader inFromServer;
   DataOutputStream outToServer;
 
@@ -103,6 +104,7 @@ class threadSenderClass implements Runnable {
       this.connectionSocket = connectionSocket;
       this.inFromServer = inFromServer;
       this.outToServer = outToServer;
+      this.inFromUser= inFromServer;
   }
   public boolean messageChecker(String usr) {
     //Make a function to check the user's Message.
@@ -118,7 +120,7 @@ class threadSenderClass implements Runnable {
               //get recUsername substring from userMessage
               //get contLen from UserMessage
               outToServer.writeBytes("SEND " + recUsername+"\n"+"Content-Length: "+contLen+"\n"+desiredMessage+"\n");
-              serverSentence = inFromServer.readLine();
+              serverSentance = inFromServer.readLine();
               inFromServer.readLine(); 
               if(serverSentance.substring(0,4).equals("SENT"))
                 {
