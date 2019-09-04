@@ -46,19 +46,19 @@ class TCPClient {
       sentence = inFromUser.readLine();
       // inFromUser.readLine();
 
-      outSender.writeBytes("REGISTER TOSEND " + sentence + "\n\n");
+      outSender.writeBytes("REGISTER TOSEND " + sentence + "\n");
       modifiedSentence = inSender.readLine();
-      inSender.readLine();
+      // inSender.readLine();
       // System.out.println("\n"+modifiedSentence);
       if (!modifiedSentence.substring(0, 3).equals("REG")) {
         System.out.println("Bad Username");
         continue;
       }
 
-      outReceiver.writeBytes("REGISTER TORECV " + sentence + " "+ pubKey + "\n\n");/////////////////
+      outReceiver.writeBytes("REGISTER TORECV " + sentence + " "+ pubKey + "\n");/////////////////
 
       modifiedSentence = inReceiver.readLine();
-      inReceiver.readLine();
+      // inReceiver.readLine();
       if (!modifiedSentence.substring(0, 3).equals("REG")) {
         System.out.println("Bad Username");
         continue;
@@ -95,7 +95,7 @@ class TCPClient {
           serverSentence = inFromServer.readLine();
           contSentence = inFromServer.readLine();
           content = inFromServer.readLine();
-          inFromServer.readLine();
+          // inFromServer.readLine();
           // System.out.println("Fowarded Msg Rec From Server: " + serverSentence +
           // "\n"+contSentence+"\n"+content+"\n");
           if (!serverSentence.substring(0, 8).equals("FORWARD ") || serverSentence.charAt(8) == ' '
@@ -108,7 +108,7 @@ class TCPClient {
           }
           if (flag != 0) {
 
-            outToServer.writeBytes("RECEIVED " + modifiedSentence + "\n\n");
+            outToServer.writeBytes("RECEIVED " + modifiedSentence + "\n");
             String pubKeySender=inFromServer.readLine();
             // boolean tamper= recieverTamperCheck(pubKeySender, pvtKey, content.split(" ")[0], content.split(" ")[1]);
             boolean tamper =true;
@@ -120,7 +120,7 @@ class TCPClient {
             System.out.println("Message Received From " + modifiedSentence + " : Tamper : " +tamper+" : " +content);
             
           } else {
-            outToServer.writeBytes("ERROR 103 Header Incomplete\n\n");
+            outToServer.writeBytes("ERROR 103 Header Incomplete\n");
           }
         } catch (Exception e) {
 
@@ -276,10 +276,10 @@ class TCPClient {
             System.out.println(desiredMessage);
             contLen = desiredMessage.length();
             outToServer.writeBytes(
-                "SEND " + recUsername + "\n" + "Content-length: " + contLen + "\n" + desiredMessage + "\n\n");
+                "SEND " + recUsername + "\n" + "Content-length: " + contLen + "\n" + desiredMessage + "\n");
             serverSentance = inFromServer.readLine();
             System.out.println(serverSentance);
-            inFromServer.readLine();
+            // inFromServer.readLine();
             if (serverSentance.substring(0, 4).equals("SENT")) {
               System.out.println("Message Delivered to " + serverSentance.substring(5));
             } else if (serverSentance.substring(0, 9).equals("ERROR 102")) {

@@ -96,7 +96,7 @@ class TCPServerThread {
                 try {
 
                     clientSentence = inFromClient.readLine();
-                    inFromClient.readLine();
+                    // inFromClient.readLine();
 
                     System.out.println("client sentence on rec to sev: " + clientSentence);
 
@@ -104,14 +104,14 @@ class TCPServerThread {
                     String pubKey = clientSentence.substring(16).split(" ")[1];
 
                     if (usernameChecker(modifiedSentence)) {
-                        outToClient.writeBytes("REGISTERED TORECV " + modifiedSentence + "\n\n");
+                        outToClient.writeBytes("REGISTERED TORECV " + modifiedSentence + "\n");
                         System.out.println("REGISTERED TORECV " + modifiedSentence + "\n"+pubKey+"\n");
                         mapReceiverPorts.put(modifiedSentence, rPorts[index]);
                         mapUserKey.put(modifiedSentence, pubKey);
                         // connectionSocket.close();
                         return;
                     } else {
-                        outToClient.writeBytes("ERROR 100 Malformed username\n\n");
+                        outToClient.writeBytes("ERROR 100 Malformed username\n");
                     }
                 } catch (Exception e) {
 
@@ -154,21 +154,21 @@ class TCPServerThread {
                 try {
 
                     clientSentence = inFromClient.readLine();
-                    inFromClient.readLine();
+                    // inFromClient.readLine();
 
                     modifiedSentence = clientSentence.substring(16);
 
                     // System.out.println("\n" + modifiedSentence);
                     if (usernameChecker(modifiedSentence)) {
                         senderUsername = modifiedSentence;
-                        modifiedSentence = "REGISTERED TOSEND " + modifiedSentence + "\n\n";
+                        modifiedSentence = "REGISTERED TOSEND " + modifiedSentence + "\n";
                         // System.out.println("swe:"+modifiedSentence);
                         outToClient.writeBytes(modifiedSentence);
                         // connectionSocket.close();
                         break;
                     } else {
                         // System.out.println("swe:err");
-                        outToClient.writeBytes("ERROR 100 Malformed username\n\n");// \n
+                        outToClient.writeBytes("ERROR 100 Malformed username\n");// \n
                     }
                 } catch (Exception e) {
 
@@ -192,9 +192,9 @@ class TCPServerThread {
                     // System.out.println("l2:"+contSentence);
                     String content = inFromClient.readLine();
                     // System.out.println("l4:"+content);
-                    inFromClient.readLine();
+                    // inFromClient.readLine();
                     // System.out.println("Msg Rec From Client: " + clientSentence +
-                    // "\n"+contSentence+"\n"+content+"\n\n");
+                    // "\n"+contSentence+"\n"+content+"\n");
                     int flag = 1;
                     if (!clientSentence.substring(0, 4).equals("SEND") || clientSentence.charAt(5) == ' '
                             || !contSentence.substring(0, 16).equals("Content-length: ")
@@ -216,24 +216,24 @@ class TCPServerThread {
                             BufferedReader inRecipent = inReceiver[rPort - 6001];
                             DataOutputStream outRecipent = outReceiver[rPort - 6001];
                             outRecipent.writeBytes("FORWARD " + senderUsername + "\n" + "Content-length: " + contLen
-                                    + "\n" + content + "\n\n");
+                                    + "\n" + content + "\n");
                                     System.out.println("this "+modifiedSentence);
                             System.out.println("awe  FORWARD " + senderUsername + "\n" + "Content-length: " + contLen
-                                    + "\n" + content + "\n\n");
+                                    + "\n" + content + "\n");
                             clientSentence = inRecipent.readLine();
                             if (!clientSentence.substring(0, 9).equals("RECEIVED ")) {
                                 System.out.println("Msg Rec From Client: " + clientSentence);
-                                outToClient.writeBytes("ERROR 102 Unable to send\n\n");
+                                outToClient.writeBytes("ERROR 102 Unable to send\n");
                             } else {
                                 outRecipent.writeBytes(mapUserKey.get(senderUsername)+"\n");
                                 // System.out.
-                                outToClient.writeBytes("SENT " + modifiedSentence + "\n\n");
+                                outToClient.writeBytes("SENT " + modifiedSentence + "\n");
                             }
                         } else {
-                            outToClient.writeBytes("ERROR 102 Unable to send\n\n");
+                            outToClient.writeBytes("ERROR 102 Unable to send\n");
                         }
                     } else {
-                        outToClient.writeBytes("ERROR 103 Header Incomplete\n\n");
+                        outToClient.writeBytes("ERROR 103 Header Incomplete\n");
                     }
                 } catch (Exception e) {
 
