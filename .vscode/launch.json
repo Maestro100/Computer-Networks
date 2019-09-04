@@ -2,6 +2,34 @@
     "configurations": [
         {
             "type": "java",
+            "name": "CodeLens (Launch) - TCPClient14",
+            "request": "launch",
+            "mainClass": "TCPClient14",
+            "projectName": "Computer-Networks-Ass2_e57d279d"
+        },
+        {
+            "type": "java",
+            "name": "CodeLens (Launch) - TCPClient13",
+            "request": "launch",
+            "mainClass": "TCPClient13",
+            "projectName": "Computer-Networks-Ass2_e57d279d"
+        },
+        {
+            "type": "java",
+            "name": "CodeLens (Launch) - TCPServerThread12",
+            "request": "launch",
+            "mainClass": "TCPServerThread12",
+            "projectName": "Computer-Networks-Ass2_e57d279d"
+        },
+        {
+            "type": "java",
+            "name": "CodeLens (Launch) - TCPClient2",
+            "request": "launch",
+            "mainClass": "TCPClient2",
+            "projectName": "Computer-Networks-Ass2_e57d279d"
+        },
+        {
+            "type": "java",
             "name": "CodeLens (Launch) - CryptographyExample",
             "request": "launch",
             "mainClass": "CryptographyExample",

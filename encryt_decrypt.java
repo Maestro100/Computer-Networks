@@ -72,26 +72,30 @@ class CryptographyExample {
 
     public static void main(String[] args) throws Exception {
 
-        String originalMessage = "Hi Ayush";
+        String originalMessage = "Hi Ayush asdhbasd dasd nasn d j ^%^&%asdgv";
 
         md = MessageDigest.getInstance("SHA-256");
         KeyPair generateKeyPair = generateKeyPair();
         byte[] publicKey = generateKeyPair.getPublic().getEncoded();
         byte[] privateKey = generateKeyPair.getPrivate().getEncoded();
-
         byte[] encryptedData = encrypt(publicKey, originalMessage.getBytes());
+        String pbk64 = Base64.getEncoder().encodeToString(publicKey);
+        String pvk64 = Base64.getEncoder().encodeToString(privateKey);
 
-        byte[] shaEncryptedData = md.digest(encryptedData); // H = hash(M')
-        // byte[]
+        // byte[] shaEncryptedData = md.digest(encryptedData); // H = hash(M')
+
+        
 
         String encryption64 = Base64.getEncoder().encodeToString(encryptedData);// this string is the message to be sent
 
         ////////////////////////////////////// decryption
         ////////////////////////////////////// part///////////////////////////////////////////
 
-        byte[] decryptedData = decrypt(privateKey, Base64.getDecoder().decode(encryption64));
+        byte[] pvk = Base64.getDecoder().decode(pvk64);
+         byte[] decryptedData = decrypt(pvk, Base64.getDecoder().decode(encryption64));
 
         // System.out.println(Base64.getEncoder().encodeToString(encryptedData));
+        System.out.println("\n"+pvk64);
         System.out.println("Original  Message: " + originalMessage);
         System.out.println("Encrypted Message: " + encryption64);
         System.out.println("Decrypted Message: " + new String(decryptedData));
