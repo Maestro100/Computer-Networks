@@ -98,14 +98,14 @@ class TCPServerThread {
                     clientSentence = inFromClient.readLine();
                     // inFromClient.readLine();
 
-                    System.out.println("client sentence on rec to sev: " + clientSentence);
+                    // System.out.println("client sentence on rec to sev: " + clientSentence);
 
                     modifiedSentence = clientSentence.substring(16).split(" ")[0];
                     String pubKey = clientSentence.substring(16).split(" ")[1];
 
                     if (usernameChecker(modifiedSentence)) {
                         outToClient.writeBytes("REGISTERED TORECV " + modifiedSentence + "\n");
-                        System.out.println("REGISTERED TORECV " + modifiedSentence + "\n"+pubKey+"\n");
+                        // System.out.println("REGISTERED TORECV " + modifiedSentence + "\n"+pubKey+"\n");
                         mapReceiverPorts.put(modifiedSentence, rPorts[index]);
                         mapUserKey.put(modifiedSentence, pubKey);
                         // connectionSocket.close();
@@ -181,10 +181,10 @@ class TCPServerThread {
              */
             while (true) {
                 try {
-                    System.out.println("Forwarder Thread @ Server");
+                    // System.out.println("Forwarder Thread @ Server");
                     String fetchKey= inFromClient.readLine();
                     fetchKey= fetchKey.substring(9);
-                    System.out.println(fetchKey);
+                    // System.out.println(fetchKey);
                     outToClient.writeBytes(mapUserKey.get(fetchKey)+"\n");
                     clientSentence = inFromClient.readLine();
                     // System.out.println("l1:"+clientSentence);
@@ -217,12 +217,11 @@ class TCPServerThread {
                             DataOutputStream outRecipent = outReceiver[rPort - 6001];
                             outRecipent.writeBytes("FORWARD " + senderUsername + "\n" + "Content-length: " + contLen
                                     + "\n" + content + "\n");
-                                    System.out.println("this "+modifiedSentence);
-                            System.out.println("awe  FORWARD " + senderUsername + "\n" + "Content-length: " + contLen
-                                    + "\n" + content + "\n");
+                                    // System.out.println("this "+modifiedSentence);
+                            // System.out.println("awe  FORWARD " + senderUsername + "\n" + "Content-length: " + contLen + "\n" + content + "\n");
                             clientSentence = inRecipent.readLine();
                             if (!clientSentence.substring(0, 9).equals("RECEIVED ")) {
-                                System.out.println("Msg Rec From Client: " + clientSentence);
+                                // System.out.println("Msg Rec From Client: " + clientSentence);
                                 outToClient.writeBytes("ERROR 102 Unable to send\n");
                             } else {
                                 outRecipent.writeBytes(mapUserKey.get(senderUsername)+"\n");

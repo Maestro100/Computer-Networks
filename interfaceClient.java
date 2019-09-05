@@ -40,7 +40,6 @@ class TCPClient {
     pubKey = Base64.getEncoder().encodeToString(publicKey);////////////
     pvtKey = Base64.getEncoder().encodeToString(privateKey);///////////
 
-
     while (true) {
       System.out.print("Write your username: ");
       sentence = inFromUser.readLine();
@@ -55,7 +54,7 @@ class TCPClient {
         continue;
       }
 
-      outReceiver.writeBytes("REGISTER TORECV " + sentence + " "+ pubKey + "\n");/////////////////
+      outReceiver.writeBytes("REGISTER TORECV " + sentence + " " + pubKey + "\n");/////////////////
 
       modifiedSentence = inReceiver.readLine();
       // inReceiver.readLine();
@@ -109,16 +108,15 @@ class TCPClient {
           if (flag != 0) {
 
             outToServer.writeBytes("RECEIVED " + modifiedSentence + "\n");
-            String pubKeySender=inFromServer.readLine();
-            // boolean tamper= recieverTamperCheck(pubKeySender, pvtKey, content.split(" ")[0], content.split(" ")[1]);
-            boolean tamper =true;
-
-
+            String pubKeySender = inFromServer.readLine();
+            // boolean tamper= recieverTamperCheck(pubKeySender, pvtKey, content.split("
+            // ")[0], content.split(" ")[1]);
+            boolean tamper = true;
 
             content = recieverGenerate(pubKeySender, pvtKey, content.split(" ")[0], content.split(" ")[1]);
 
-            System.out.println("Message Received From " + modifiedSentence + " : Tamper : " +tamper+" : " +content);
-            
+            System.out.println("Message Received From " + modifiedSentence + " : " + content);
+
           } else {
             outToServer.writeBytes("ERROR 103 Header Incomplete\n");
           }
@@ -171,7 +169,7 @@ class TCPClient {
 
   public static String senderGenerate(String message, String pubKeyB, String pvtKeyA) throws Exception {
     // A->B
-    System.out.println("sender start+ "+ message);
+    // System.out.println("sender start+ "+ message);
     byte[] publicKeyB = Base64.getDecoder().decode(pubKeyB);
     byte[] privateKeyA = Base64.getDecoder().decode(pvtKeyA);
 
@@ -179,25 +177,28 @@ class TCPClient {
 
     // byte[] shaMdash = md.digest(mDash);// H
 
-    // byte[] hDash = encrypt(privateKeyA, (Base64.getEncoder().encodeToString(shaMdash)).getBytes());// H'
-                                                                                                   // =kvtA(64(H))
-    
+    // byte[] hDash = encrypt(privateKeyA,
+    // (Base64.getEncoder().encodeToString(shaMdash)).getBytes());// H'
+    // =kvtA(64(H))
+
     String mDash64 = Base64.getEncoder().encodeToString(mDash);
     // String hDash64 = Base64.getEncoder().encodeToString(hDash);
     String hDash64 = "asdf";
-    System.out.println(mDash64+"  "+hDash64);
-    return hDash64+" "+mDash64;
+    // System.out.println(mDash64+" "+hDash64);
+    return hDash64 + " " + mDash64;
   }
 
-  public static String recieverGenerate(String pubKeyA, String pvtKeyB, String hDash64, String mDash64) throws Exception {
+  public static String recieverGenerate(String pubKeyA, String pvtKeyB, String hDash64, String mDash64)
+      throws Exception {
     // A->B
-    //byte[] publicKeyA = Base64.getDecoder().decode(pubKeyA);
+    // byte[] publicKeyA = Base64.getDecoder().decode(pubKeyA);
     byte[] privateKeyB = Base64.getDecoder().decode(pvtKeyB);
-    //byte[] hDash = Base64.getDecoder().decode(hDash64);
+    // byte[] hDash = Base64.getDecoder().decode(hDash64);
     byte[] mDash = Base64.getDecoder().decode(mDash64);
-    //byte[] h = Base64.getDecoder().decode(decrypt(publicKeyA, hDash)); // H' = pvtA(64(H))
+    // byte[] h = Base64.getDecoder().decode(decrypt(publicKeyA, hDash)); // H' =
+    // pvtA(64(H))
 
-    //byte[] shaMdash = md.digest(mDash);
+    // byte[] shaMdash = md.digest(mDash);
 
     // return true (h==mDash);
 
@@ -205,19 +206,20 @@ class TCPClient {
     return message;
   }
 
-  public static boolean recieverTamperCheck(String pubKeyA, String pvtKeyB, String hDash64, String mDash64) throws Exception {
+  public static boolean recieverTamperCheck(String pubKeyA, String pvtKeyB, String hDash64, String mDash64)
+      throws Exception {
     // A->B
     byte[] publicKeyA = Base64.getDecoder().decode(pubKeyA);
-    //byte[] privateKeyB = Base64.getDecoder().decode(pvtKeyB);
+    // byte[] privateKeyB = Base64.getDecoder().decode(pvtKeyB);
     byte[] hDash = Base64.getDecoder().decode(hDash64);
     byte[] mDash = Base64.getDecoder().decode(mDash64);
     byte[] h = Base64.getDecoder().decode(decrypt(publicKeyA, hDash)); // H' = pvtA(64(H))
 
     byte[] shaMdash = md.digest(mDash);
 
-    return Arrays.equals(h,shaMdash);
+    return Arrays.equals(h, shaMdash);
 
-    //String message = new String(decrypt(privateKeyB, mDash));
+    // String message = new String(decrypt(privateKeyB, mDash));
 
   }
 
@@ -262,23 +264,23 @@ class TCPClient {
           System.out.println("Enter @[Username] [Message] ");
           userMessage = inFromUser.readLine();
           int sub = messageChecker(userMessage);
-          System.out.println("sub = "+sub);
+          // System.out.println("sub = "+sub);
           if (sub != 0) {
             recUsername = userMessage.substring(1, sub);
             desiredMessage = userMessage.substring(sub + 1);
             // contLen = userMessage.length() - sub - 1;
-            System.out.println("fet =");
-            outToServer.writeBytes("FETCHKEY " + recUsername+ "\n");
+            // System.out.println("fet =");
+            outToServer.writeBytes("FETCHKEY " + recUsername + "\n");
             String pubKeyRecepient = inFromServer.readLine();
-            System.out.println(pubKeyRecepient);
+            // System.out.println(pubKeyRecepient);
             //////////////////////////////
-            desiredMessage = senderGenerate( desiredMessage, pubKeyRecepient,  pvtKey);
-            System.out.println(desiredMessage);
+            desiredMessage = senderGenerate(desiredMessage, pubKeyRecepient, pvtKey);
+            // System.out.println(desiredMessage);
             contLen = desiredMessage.length();
-            outToServer.writeBytes(
-                "SEND " + recUsername + "\n" + "Content-length: " + contLen + "\n" + desiredMessage + "\n");
+            outToServer
+                .writeBytes("SEND " + recUsername + "\n" + "Content-length: " + contLen + "\n" + desiredMessage + "\n");
             serverSentance = inFromServer.readLine();
-            System.out.println(serverSentance);
+            // System.out.println(serverSentance);
             // inFromServer.readLine();
             if (serverSentance.substring(0, 4).equals("SENT")) {
               System.out.println("Message Delivered to " + serverSentance.substring(5));
