@@ -13,7 +13,8 @@
 //(H',M') to be sent at place of message
 //hashmap registers pub key too.
 //FETCHKEY for both end clients
-
+import  java.math.BigInteger;
+import java.nio.charset.StandardCharsets;
 import java.security.KeyFactory;
 import java.security.KeyPair;
 import java.security.KeyPairGenerator;
@@ -78,24 +79,23 @@ class CryptographyExample {
         KeyPair generateKeyPair = generateKeyPair();
         byte[] publicKey = generateKeyPair.getPublic().getEncoded();
         byte[] privateKey = generateKeyPair.getPrivate().getEncoded();
-        byte[] encryptedData = encrypt(publicKey, originalMessage.getBytes());
-        // String pbk64 = Base64.getEncoder().encodeToString(publicKey);
-        // String pvk64 = Base64.getEncoder().encodeToString(privateKey);
-
+        byte[] encryptedData = encrypt(publicKey, originalMessage.getBytes(StandardCharsets.UTF_8));
+        String pbk64 = Base64.getEncoder().encodeToString(publicKey);
+        String pvk64 = Base64.getEncoder().encodeToString(privateKey);
         byte[] shaEncryptedData = md.digest(encryptedData); // H = hash(M')
 
-        // String shaEncryption64 = Base64.getEncoder().encodeToString(shaEncryptedData);// this string is the message to be sent
-        String shaEncryption64 = new String(encryptedData);
-        byte[] decryptedData = decrypt(privateKey, Base64.getDecoder().decode(shaEncryption64));
-        
+        String shaEncryption64 = Base64.getEncoder().encodeToString(shaEncryptedData);// this string is the message to be sent
+        // String shaEncryption64 = new String(encryptedData);
+        // byte[] decryptedData = decrypt(privateKey, Base64.getDecoder().decode(shaEncryption64));
+        // System.out.println(toHexString(encryptedData));
 
-        // String encryption64 = Base64.getEncoder().encodeToString(encryptedData);// this string is the message to be sent
+        String encryption64 = Base64.getEncoder().encodeToString(encryptedData);// this string is the message to be sent
 
         ////////////////////////////////////// decryption
         ////////////////////////////////////// part///////////////////////////////////////////
 
-        // byte[] pvk = Base64.getDecoder().decode(pvk64);
-        // byte[] decryptedData = decrypt(pvk, Base64.getDecoder().decode(shaEncryption64));
+        byte[] pvk = Base64.getDecoder().decode(pvk64);
+        byte[] decryptedData = decrypt(pvk, Base64.getDecoder().decode(shaEncryption64));
 
         // System.out.println(Base64.getEncoder().encodeToString(encryptedData));
         // System.out.println("\n"+pvk64);
@@ -103,6 +103,33 @@ class CryptographyExample {
         // System.out.println("Encrypted Message: " + encryption64);
         // System.out.println("Decrypted Message: " + new String(decryptedData));
 
+    }
+    public static byte[] getSHA(String input) throws NoSuchAlgorithmException 
+    {  
+        // Static getInstance method is called with hashing SHA  
+        MessageDigest md = MessageDigest.getInstance("SHA-256");  
+  
+        // digest() method called  
+        // to calculate message digest of an input  
+        // and return array of byte 
+        return md.digest(input.getBytes(StandardCharsets.UTF_8));  
+    } 
+    
+    public static String toHexString(byte[] hash) 
+    { 
+        // Convert byte array into signum representation  
+        BigInteger number = new BigInteger(1, hash);  
+  
+        // Convert message digest into hex value  
+        StringBuilder hexString = new StringBuilder(number.toString(16));  
+  
+        // Pad with leading zeros 
+        while (hexString.length() < 32)  
+        {  
+            hexString.insert(0, '0');  
+        }  
+  
+        return hexString.toString();  
     }
 /*
     public static void senderGenerate(String message, String pubKeyB, String pvtKeyA) throws Exception {
