@@ -84,7 +84,8 @@ class CryptographyExample {
 
         byte[] shaEncryptedData = md.digest(encryptedData); // H = hash(M')
 
-        String shaEncryption64 = Base64.getEncoder().encodeToString(shaEncryptedData);// this string is the message to be sent
+        // String shaEncryption64 = Base64.getEncoder().encodeToString(shaEncryptedData);// this string is the message to be sent
+        String shaEncryption64 = new String(encryptedData);
         byte[] decryptedData = decrypt(privateKey, Base64.getDecoder().decode(shaEncryption64));
         
 
