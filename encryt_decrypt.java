@@ -34,7 +34,9 @@ class CryptographyExample {
     private static final String ALGORITHM = "RSA";
 
     public static byte[] encrypt(byte[] publicKey, byte[] inputData) throws Exception {
-        PublicKey key = KeyFactory.getInstance(ALGORITHM).generatePublic(new X509EncodedKeySpec(publicKey));
+        // PublicKey key = KeyFactory.getInstance(ALGORITHM).generatePublic(new X509EncodedKeySpec(publicKey));
+        PublicKey key = KeyFactory.getInstance(ALGORITHM).generatePublic(new PKCS8EncodedKeySpec(publicKey));
+
 
         Cipher cipher = Cipher.getInstance(ALGORITHM);
         cipher.init(Cipher.ENCRYPT_MODE, key);
@@ -79,7 +81,7 @@ class CryptographyExample {
         KeyPair generateKeyPair = generateKeyPair();
         byte[] publicKey = generateKeyPair.getPublic().getEncoded();
         byte[] privateKey = generateKeyPair.getPrivate().getEncoded();
-        byte[] encryptedData = encrypt(publicKey, originalMessage.getBytes(StandardCharsets.UTF_8));
+        byte[] encryptedData = encrypt(publicKey, originalMessage.getBytes());
         String pbk64 = Base64.getEncoder().encodeToString(publicKey);
         String pvk64 = Base64.getEncoder().encodeToString(privateKey);
         byte[] shaEncryptedData = md.digest(encryptedData); // H = hash(M')
