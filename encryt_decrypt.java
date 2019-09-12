@@ -34,8 +34,7 @@ class CryptographyExample {
     private static final String ALGORITHM = "RSA";
 
     public static byte[] encrypt(byte[] publicKey, byte[] inputData) throws Exception {
-        // PublicKey key = KeyFactory.getInstance(ALGORITHM).generatePublic(new X509EncodedKeySpec(publicKey));
-        PublicKey key = KeyFactory.getInstance(ALGORITHM).generatePublic(new PKCS8EncodedKeySpec(publicKey));
+        PublicKey key = KeyFactory.getInstance(ALGORITHM).generatePublic(new X509EncodedKeySpec(publicKey));
 
 
         Cipher cipher = Cipher.getInstance(ALGORITHM);
@@ -58,52 +57,71 @@ class CryptographyExample {
         return decryptedBytes;
     }
 
+
+    public static byte[] encryptUsingPrivate(byte[] privateKey, byte[] inputData) throws Exception {
+        PrivateKey key = KeyFactory.getInstance(ALGORITHM).generatePrivate(new PKCS8EncodedKeySpec(privateKey));
+        Cipher cipher = Cipher.getInstance(ALGORITHM);
+        cipher.init(Cipher.ENCRYPT_MODE, key);
+        byte[] encryptedBytes = cipher.doFinal(inputData);
+        return encryptedBytes;
+    }
+
+    public static byte[] decryptUsingPublic(byte[] publicKey, byte[] inputData) throws Exception {
+        PublicKey key = KeyFactory.getInstance(ALGORITHM).generatePublic(new X509EncodedKeySpec(publicKey));
+        Cipher cipher = Cipher.getInstance(ALGORITHM);
+        cipher.init(Cipher.DECRYPT_MODE, key);
+        byte[] decryptedBytes = cipher.doFinal(inputData);
+        return decryptedBytes;
+    }
+
+    public static byte[] getHash(byte[] message)throws NoSuchAlgorithmException{
+        MessageDigest md = MessageDigest.getInstance("SHA-256");
+        byte[] hashedMessage = md.digest(message);
+        return hashedMessage;
+
+    }
+   
     public static KeyPair generateKeyPair() throws NoSuchAlgorithmException, NoSuchProviderException {
 
         KeyPairGenerator keyGen = KeyPairGenerator.getInstance(ALGORITHM);
-
         SecureRandom random = SecureRandom.getInstance("SHA1PRNG", "SUN");
-
         // 512 is keysize
         keyGen.initialize(512, random);
-
         KeyPair generateKeyPair = keyGen.generateKeyPair();
         return generateKeyPair;
     }
 
-    public static MessageDigest md;
+    // public static MessageDigest md;
 
     public static void main(String[] args) throws Exception {
 
-        String originalMessage = "The message to be encrypted and sent";
-        String encoding = "UTF-8";
-        md = MessageDigest.getInstance("SHA-256");
-        KeyPair generateKeyPair = generateKeyPair();
-        byte[] publicKey = generateKeyPair.getPublic().getEncoded();
-        byte[] privateKey = generateKeyPair.getPrivate().getEncoded();
-        byte[] encryptedData = encrypt(publicKey, originalMessage.getBytes());
-        String pbk64 = Base64.getEncoder().encodeToString(publicKey);
-        String pvk64 = Base64.getEncoder().encodeToString(privateKey);
-        byte[] shaEncryptedData = md.digest(encryptedData); // H = hash(M')
+        String originalMessage = "The message to be dododod encrypted and sent";
+        KeyPair generateKeyPairB = generateKeyPair();
+        byte[] publicKeyB = generateKeyPairB.getPublic().getEncoded();
+        byte[] privateKeyB = generateKeyPairB.getPrivate().getEncoded();
+        KeyPair generateKeyPairA = generateKeyPair();
+        byte[] publicKeyA = generateKeyPairA.getPublic().getEncoded();
+        byte[] privateKeyA = generateKeyPairA.getPrivate().getEncoded();
 
-        String shaEncryption64 = Base64.getEncoder().encodeToString(shaEncryptedData);// this string is the message to be sent
-        // String shaEncryption64 = new String(encryptedData);
-        // byte[] decryptedData = decrypt(privateKey, Base64.getDecoder().decode(shaEncryption64));
-        // System.out.println(toHexString(encryptedData));
+        byte[] encryptedData = encrypt(publicKeyB, originalMessage.getBytes());//M'
+        byte[] shaEncryptedData = getHash(encryptedData);//H = hash(M')
+        byte[] hDash = encryptUsingPrivate(privateKeyA, shaEncryptedData);//H' = KpvtA(H);
 
-        String encryption64 = Base64.getEncoder().encodeToString(encryptedData);// this string is the message to be sent
+   
 
+        String encryption64 = Base64.getEncoder().encodeToString(encryptedData);
+        String hDash64 =  Base64.getEncoder().encodeToString(hDash);
         ////////////////////////////////////// decryption
         ////////////////////////////////////// part///////////////////////////////////////////
 
-        byte[] pvk = Base64.getDecoder().decode(pvk64);
-        byte[] decryptedData = decrypt(pvk, Base64.getDecoder().decode(shaEncryption64));
+        // byte[] pvk = Base64.getDecoder().decode(pvk64);
+        byte[] decryptedData = decrypt(privateKeyB, Base64.getDecoder().decode(encryption64));
+        System.out.println("Decrypted Message: " + new String(decryptedData));
+        
+        // hash(M') = KpubA(H')
+        if(Arrays.equals(getHash(Base64.getDecoder().decode(encryption64)),decryptUsingPublic(publicKeyA,Base64.getDecoder().decode(hDash64)))) System.out.println("YESs");
+        else System.out.println("NOo");
 
-        // System.out.println(Base64.getEncoder().encodeToString(encryptedData));
-        // System.out.println("\n"+pvk64);
-        System.out.println("Original  Message: " + originalMessage);
-        // System.out.println("Encrypted Message: " + encryption64);
-        // System.out.println("Decrypted Message: " + new String(decryptedData));
 
     }
     public static byte[] getSHA(String input) throws NoSuchAlgorithmException 
