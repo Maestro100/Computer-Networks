@@ -109,12 +109,11 @@ class TCPClient2 {
 
             outToServer.writeBytes("RECEIVED " + modifiedSentence + "\n");
             String pubKeySender = inFromServer.readLine();
-            // boolean tamper= recieverTamperCheck(pubKeySender, pvtKey, content.split("
-            // ")[0], content.split(" ")[1]);
-            boolean tamper = true;
+            boolean tamper= recieverTamperCheck(pubKeySender, pvtKey, content.split(" ")[0], content.split(" ")[1]);
+            // boolean tamper = true;
 
             content = recieverGenerate(pubKeySender, pvtKey, content.split(" ")[0], content.split(" ")[1]);
-
+            System.out.println("Message signature correct: "+ tamper);
             System.out.println("Message Received From " + modifiedSentence + " : " + content);
 
           } else {
@@ -152,6 +151,31 @@ class TCPClient2 {
     return decryptedBytes;
   }
 
+
+  public static byte[] encryptUsingPrivate(byte[] privateKey, byte[] inputData) throws Exception {
+    PrivateKey key = KeyFactory.getInstance(ALGORITHM).generatePrivate(new PKCS8EncodedKeySpec(privateKey));
+    Cipher cipher = Cipher.getInstance(ALGORITHM);
+    cipher.init(Cipher.ENCRYPT_MODE, key);
+    byte[] encryptedBytes = cipher.doFinal(inputData);
+    return encryptedBytes;
+}
+
+public static byte[] decryptUsingPublic(byte[] publicKey, byte[] inputData) throws Exception {
+    PublicKey key = KeyFactory.getInstance(ALGORITHM).generatePublic(new X509EncodedKeySpec(publicKey));
+    Cipher cipher = Cipher.getInstance(ALGORITHM);
+    cipher.init(Cipher.DECRYPT_MODE, key);
+    byte[] decryptedBytes = cipher.doFinal(inputData);
+    return decryptedBytes;
+}
+
+public static byte[] getHash(byte[] message)throws NoSuchAlgorithmException{
+    MessageDigest md = MessageDigest.getInstance("SHA-256");
+    byte[] hashedMessage = md.digest(message);
+    return hashedMessage;
+
+}
+
+
   public static KeyPair generateKeyPair() throws NoSuchAlgorithmException, NoSuchProviderException {
 
     KeyPairGenerator keyGen = KeyPairGenerator.getInstance(ALGORITHM);
@@ -165,7 +189,7 @@ class TCPClient2 {
     return generateKeyPair;
   }
 
-  public static MessageDigest md;
+  // public static MessageDigest md;
 
   public static String senderGenerate(String message, String pubKeyB, String pvtKeyA) throws Exception {
     // A->B
@@ -174,16 +198,13 @@ class TCPClient2 {
     byte[] privateKeyA = Base64.getDecoder().decode(pvtKeyA);
 
     byte[] mDash = encrypt(publicKeyB, message.getBytes());// M'
-
-    // byte[] shaMdash = md.digest(mDash);// H
-
-    // byte[] hDash = encrypt(privateKeyA,
-    // (Base64.getEncoder().encodeToString(shaMdash)).getBytes());// H'
-    // =kvtA(64(H))
+    byte[] shaEncryptedData = getHash(mDash);//H = hash(M')
+    byte[] hDash = encryptUsingPrivate(privateKeyA, shaEncryptedData);//H' = KpvtA(H);
+    
 
     String mDash64 = Base64.getEncoder().encodeToString(mDash);
-    // String hDash64 = Base64.getEncoder().encodeToString(hDash);
-    String hDash64 = "asdf";
+    String hDash64 = Base64.getEncoder().encodeToString(hDash);
+    // String hDash64 = "asdf";
     // System.out.println(mDash64+" "+hDash64);
     return hDash64 + " " + mDash64;
   }
@@ -206,21 +227,9 @@ class TCPClient2 {
     return message;
   }
 
-  public static boolean recieverTamperCheck(String pubKeyA, String pvtKeyB, String hDash64, String mDash64)
-      throws Exception {
+  public static boolean recieverTamperCheck(String pubKeyA, String pvtKeyB, String hDash64, String mDash64) throws NoSuchAlgorithmException, Exception {
     // A->B
-    byte[] publicKeyA = Base64.getDecoder().decode(pubKeyA);
-    // byte[] privateKeyB = Base64.getDecoder().decode(pvtKeyB);
-    byte[] hDash = Base64.getDecoder().decode(hDash64);
-    byte[] mDash = Base64.getDecoder().decode(mDash64);
-    byte[] h = Base64.getDecoder().decode(decrypt(publicKeyA, hDash)); // H' = pvtA(64(H))
-
-    byte[] shaMdash = md.digest(mDash);
-
-    return Arrays.equals(h, shaMdash);
-
-    // String message = new String(decrypt(privateKeyB, mDash));
-
+    return Arrays.equals(getHash(Base64.getDecoder().decode(mDash64)),decryptUsingPublic(Base64.getDecoder().decode(pubKeyA),Base64.getDecoder().decode(hDash64)));
   }
 
   static class threadSenderClass implements Runnable {
