@@ -17,7 +17,7 @@ import javax.crypto.Cipher;
 class TCPClient {
   static String pubKey;
   static String pvtKey;
-
+  static String mode;
   public static void main(String argv[]) throws Exception {
     String sentence;
     String modifiedSentence;
@@ -44,7 +44,7 @@ class TCPClient {
       System.out.print("Write your username: ");
       sentence = inFromUser.readLine();
       // inFromUser.readLine();
-
+      // mode = Integer.parseInt(inFromUser.readLine());
       outSender.writeBytes("REGISTER TOSEND " + sentence + "\n");
       modifiedSentence = inSender.readLine();
       // inSender.readLine();
@@ -62,6 +62,8 @@ class TCPClient {
         System.out.println("Bad Username");
         continue;
       }
+      
+      mode=modifiedSentence.split(" ")[3];
       System.out.println("connection established");
       break;
     }
@@ -94,8 +96,9 @@ class TCPClient {
           serverSentence = inFromServer.readLine();
           contSentence = inFromServer.readLine();
           content = inFromServer.readLine();
+          
           // inFromServer.readLine();
-          // System.out.println("Fowarded Msg Rec From Server: " + serverSentence +
+          // System.out.println("Cont:"+content);
           // "\n"+contSentence+"\n"+content+"\n");
           if (!serverSentence.substring(0, 8).equals("FORWARD ") || serverSentence.charAt(8) == ' '
               || !contSentence.substring(0, 16).equals("Content-length: ") || contSentence.charAt(16) == ' ')
@@ -103,17 +106,25 @@ class TCPClient {
           else {
             modifiedSentence = serverSentence.substring(8);
             contSentence = contSentence.substring(16);
-            content = content.substring(0, Integer.parseInt(contSentence));
+            content = content.substring(0, Integer.parseInt(contSentence));  
+          // System.out.println("Cont:"+content);
           }
+          
+          // System.out.println("F:"+flag);
           if (flag != 0) {
 
             outToServer.writeBytes("RECEIVED " + modifiedSentence + "\n");
             String pubKeySender = inFromServer.readLine();
-            boolean tamper= recieverTamperCheck(pubKeySender, pvtKey, content.split(" ")[0], content.split(" ")[1]);
-            // boolean tamper = true;
-
-            content = recieverGenerate(pubKeySender, pvtKey, content.split(" ")[0], content.split(" ")[1]);
-            System.out.println("Message signature correct: "+ tamper);
+            boolean tamper;
+            if(mode.equals("3"))
+            {
+              tamper= recieverTamperCheck(pubKeySender, pvtKey, content.split(" ")[0], content.split(" ")[1]);
+              if(!tamper)
+                System.out.println("Message tampered");         
+              content = recieverGenerate(pubKeySender, pvtKey, content.split(" ")[0], content.split(" ")[1]);
+            }
+            else if(mode.equals("2"))
+              content = recieverGenerate(pubKeySender, pvtKey, " ", content);
             System.out.println("Message Received From " + modifiedSentence + " : " + content);
 
           } else {
@@ -206,7 +217,10 @@ public static byte[] getHash(byte[] message)throws NoSuchAlgorithmException{
     String hDash64 = Base64.getEncoder().encodeToString(hDash);
     // String hDash64 = "asdf";
     // System.out.println(mDash64+" "+hDash64);
-    return hDash64 + " " + mDash64;
+    if(mode.equals("3"))
+      return hDash64 + " " + mDash64;
+    else
+      return mDash64;
   }
 
   public static String recieverGenerate(String pubKeyA, String pvtKeyB, String hDash64, String mDash64)
@@ -283,7 +297,8 @@ public static byte[] getHash(byte[] message)throws NoSuchAlgorithmException{
             String pubKeyRecepient = inFromServer.readLine();
             // System.out.println(pubKeyRecepient);
             //////////////////////////////
-            desiredMessage = senderGenerate(desiredMessage, pubKeyRecepient, pvtKey);
+            if(!mode.equals("1"))
+              desiredMessage = senderGenerate(desiredMessage, pubKeyRecepient, pvtKey);
             // System.out.println(desiredMessage);
             contLen = desiredMessage.length();
             outToServer

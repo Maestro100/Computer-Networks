@@ -17,9 +17,13 @@ class TCPServerThread {
     static BufferedReader[] inSender;
     static DataOutputStream[] outReceiver;
     static DataOutputStream[] outSender;
-
+    static String mode;
     public static void main(String argv[]) throws Exception {
-        nUsers = 2;
+        nUsers = 5;
+        BufferedReader inFromUser = new BufferedReader(new InputStreamReader(System.in));
+        System.out.print("Enter Mode 1 :No Encryption, 2 :Encrypted, 3 :Encrypted With Signature :");
+        mode = inFromUser.readLine();
+        
         mapReceiverPorts = new HashMap<>();
         mapUserKey = new HashMap<>();
         System.out.println(nUsers + " Users\n");
@@ -33,35 +37,18 @@ class TCPServerThread {
         outSender = new DataOutputStream[nUsers];
         // System.out.println("ser start");
         // int i;
+        
         for (int i = 0; i < nUsers; i++) {
-            receiverSocket[i] = new ServerSocket(rPorts[i]);
-            senderSocket[i] = new ServerSocket(sPorts[i]);
-
-            // System.out.println("con estab");
-
-            receiverConnectionSocket[i] = receiverSocket[i].accept();
-            senderConnectionSocket[i] = senderSocket[i].accept();
-
-            inReceiver[i] = new BufferedReader(new InputStreamReader(receiverConnectionSocket[i].getInputStream()));
-            inSender[i] = new BufferedReader(new InputStreamReader(senderConnectionSocket[i].getInputStream()));
-
-            outReceiver[i] = new DataOutputStream(receiverConnectionSocket[i].getOutputStream());
-            outSender[i] = new DataOutputStream(senderConnectionSocket[i].getOutputStream());
-
-            // threadReceiverClass socketThreadReceiverClass = new
-            // threadReceiverClass(receiverConnectionSocket, inReceiver, outReceiver,
-            // rPorts[i], mapReceiverPorts);
-            // threadSenderClass socketThreadSenderClass = new
-            // threadSenderClass(senderConnectionSocket, inSender, outSender, sPorts[i],
-            // mapReceiverPorts);
             Thread threadReceiver = new Thread(
-                    new threadReceiverClass(receiverConnectionSocket[i], inReceiver[i], outReceiver[i], i));
+                    new threadReceiverClass(i));
+            
             Thread threadSender = new Thread(
-                    new threadSenderClass(senderConnectionSocket[i], inSender[i], outSender[i], i));
+                    new threadSenderClass(i));
 
             threadReceiver.start();
             threadSender.start();
-        }
+            System.out.println("Thread Stared: "+i);
+    }
     }
 
     static class threadReceiverClass implements Runnable {
@@ -72,12 +59,9 @@ class TCPServerThread {
         DataOutputStream outToClient;
         int index;
 
-        threadReceiverClass(Socket connectionSocket, BufferedReader inFromClient, DataOutputStream outToClient,
-                int index) {
-            this.connectionSocket = connectionSocket;
-            this.inFromClient = inFromClient;
-            this.outToClient = outToClient;
-            this.index = index;
+        threadReceiverClass(int i)throws Exception  {
+           
+            this.index = i;
         }
 
         public boolean usernameChecker(String usr) {
@@ -92,8 +76,19 @@ class TCPServerThread {
         }
 
         public void run() {
+            try {
+            int i = index;
+            receiverSocket[i] = new ServerSocket(rPorts[i]);
+            receiverConnectionSocket[i] = receiverSocket[i].accept();
+            
+            inReceiver[i] = new BufferedReader(new InputStreamReader(receiverConnectionSocket[i].getInputStream()));
+            outReceiver[i] = new DataOutputStream(receiverConnectionSocket[i].getOutputStream());
+            
+            connectionSocket = receiverConnectionSocket[i];
+            inFromClient = inReceiver[i];
+            outToClient = outReceiver[i];
             while (true) {
-                try {
+                
 
                     clientSentence = inFromClient.readLine();
                     // inFromClient.readLine();
@@ -104,7 +99,7 @@ class TCPServerThread {
                     String pubKey = clientSentence.substring(16).split(" ")[1];
 
                     if (usernameChecker(modifiedSentence)) {
-                        outToClient.writeBytes("REGISTERED TORECV " + modifiedSentence + "\n");
+                        outToClient.writeBytes("REGISTERED TORECV " + modifiedSentence +" "+ mode +"\n");
                         // System.out.println("REGISTERED TORECV " + modifiedSentence + "\n"+pubKey+"\n");
                         mapReceiverPorts.put(modifiedSentence, rPorts[index]);
                         mapUserKey.put(modifiedSentence, pubKey);
@@ -113,9 +108,9 @@ class TCPServerThread {
                     } else {
                         outToClient.writeBytes("ERROR 100 Malformed username\n");
                     }
-                } catch (Exception e) {
+                } 
+            }catch (Exception e) {
 
-                }
             }
         }
     }
@@ -130,12 +125,9 @@ class TCPServerThread {
         int index;
         int contLen;
 
-        threadSenderClass(Socket connectionSocket, BufferedReader inFromClient, DataOutputStream outToClient,
-                int index) {
-            this.connectionSocket = connectionSocket;
-            this.inFromClient = inFromClient;
-            this.outToClient = outToClient;
-            this.index = index;
+        threadSenderClass(int i) {
+           
+            this.index = i;
         }
 
         public boolean usernameChecker(String usr) {
@@ -150,8 +142,19 @@ class TCPServerThread {
         }
 
         public void run() {
+            try{
+
+            int i= index;
+            senderSocket[i] = new ServerSocket(sPorts[i]);
+            senderConnectionSocket[i] = senderSocket[i].accept();
+            inSender[i] = new BufferedReader(new InputStreamReader(senderConnectionSocket[i].getInputStream()));
+            outSender[i] = new DataOutputStream(senderConnectionSocket[i].getOutputStream());
+            
+            connectionSocket = senderConnectionSocket[i];
+            inFromClient = inSender[i];
+            outToClient = outSender[i];
             while (true) {
-                try {
+                
 
                     clientSentence = inFromClient.readLine();
                     // inFromClient.readLine();
@@ -170,9 +173,10 @@ class TCPServerThread {
                         // System.out.println("swe:err");
                         outToClient.writeBytes("ERROR 100 Malformed username\n");// \n
                     }
-                } catch (Exception e) {
+                } 
+            }
+             catch (Exception e) {
 
-                }
             }
             /*
              * Get the Send Message, parse it if its headers are correct then Forward
@@ -218,7 +222,7 @@ class TCPServerThread {
                             outRecipent.writeBytes("FORWARD " + senderUsername + "\n" + "Content-length: " + contLen
                                     + "\n" + content + "\n");
                                     // System.out.println("this "+modifiedSentence);
-                            // System.out.println("awe  FORWARD " + senderUsername + "\n" + "Content-length: " + contLen + "\n" + content + "\n");
+                            System.out.println("Forwarding From: " + senderUsername + "\n" + "Msg: " +content );
                             clientSentence = inRecipent.readLine();
                             if (!clientSentence.substring(0, 9).equals("RECEIVED ")) {
                                 // System.out.println("Msg Rec From Client: " + clientSentence);
