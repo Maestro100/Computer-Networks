@@ -1,4 +1,4 @@
-# Computer-Networks-Ass2
+# Computer-Networks
 Chat Application
 
 Open the Ass2_col334 folder. It contains all the codes, README and a report.
