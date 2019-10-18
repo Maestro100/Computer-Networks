@@ -1,9 +1,0 @@
-Unregister- Just remove the socket form the hash map
-Ctrl-C- We can throw an exception in the server sender thread(which forwards the message), and handle it by removing the entry from the hash map.
-
-Instead of removing the entry from the hash map, we make a queue and store these messages and send a single tick response to the sender,
-when the user registers again, then we will 1st check if there is a residual queue of messages and keep sending blue ticks to the old sender.
-
-Read about Gnutella 
-
-source code of your assignment and a README on how to execute the server and client applications, and a doc directory containing a report.
