@@ -1,0 +1,25 @@
+Write a review of the paper along these suggested points
+ - Historical context in which the paper was written
+         - What was happening during the evolution of the Internet which prompted this paper. Use the references in the paper to understand this context
+         - What was the key research question the paper was asking
+         - Why was this question important then
+- For experimental papers
+         - What was the methodology
+         - Any gaps in the methodology, any assumptions made explicitly or implicitly that might affect the applicability of the claims
+         - Final conclusions
+- For argumentative papers
+         - What was the framing
+         - Any gaps in which the framing was done, any use-cases that were ignored
+         - Final conclusions
+- What were the key high level messages in the paper, the takeaways that you would want to retain
+- Are similar questions relevant in today's context
+         - For experimental papers: Would repeating some of these experiments make sense, how would you change the experiments today
+         - For argumentative papers: Is the framing valid today, how would you change it and raise questions
+         - Has some recent work explored these new directions already. You can check by using Google scholar to follow the citations of these papers in the recent years
+
+You do not have to follow this structure necessarily, but your review should bring out the key points the paper is makings, its past and current relevance,
+the methods used and conclusions, and its strengths and weaknesses.
+
+Useful readings
+How to read a paper, by S. Keshav. This will be especially relevant when scanning through the papers cited in this paper, and recent papers that have cited this paper
+http://ccr.sigcomm.org/online/files/p83-keshavA.pdf
