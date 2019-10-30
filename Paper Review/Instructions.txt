@@ -23,3 +23,5 @@ the methods used and conclusions, and its strengths and weaknesses.
 Useful readings
 How to read a paper, by S. Keshav. This will be especially relevant when scanning through the papers cited in this paper, and recent papers that have cited this paper
 http://ccr.sigcomm.org/online/files/p83-keshavA.pdf
+
+Paper Link: http://www.cse.iitd.ernet.in/~aseth/cellular_data_connectivity_india.pdf
